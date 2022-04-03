@@ -20,6 +20,8 @@
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "TVector3.h"
+#include "TVectorD.h"
+#include "TMatrixDSym.h"
 
 OniaPseudoTrackTrackProducer::OniaPseudoTrackTrackProducer(const edm::ParameterSet& ps):
   OniaCollection_(consumes<pat::CompositeCandidateCollection>(ps.getParameter<edm::InputTag>("Onia"))),
@@ -106,11 +108,12 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
         std::cout<<" PV i = "<<chkPV<<std::endl;
        }*/
 
+       int piIdx = -1;
        if (Tracks.isValid() && !Tracks->empty()) {
          for (std::vector<pat::PackedCandidate>::const_iterator pp = Tracks->begin(); pp!= Tracks->end(); ++pp) {
            if (!pp->trackHighPurity() || !pp->fromPV() || std::abs(pp->pdgId())!=211 || !pp->hasTrackDetails()) continue;
            //if (!pp->trackHighPurity() || !(pp->fromPV() == 2) || std::abs(pp->pdgId())!=211 || !pp->hasTrackDetails()) continue;
-           //if ( pp->vertexRef().key()!=0) continue;
+           if ( pp->vertexRef().key()!=0) continue;
            const reco::Track* TheTrack = &pp->pseudoTrack();
            //if (TheTrack->pt()<0.5 || std::abs(TheTrack->eta())>2.5 || TheTrack->charge()==0 ) continue;
            if (TheTrack->charge()==0) continue;
@@ -122,6 +125,30 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
            dzAssocPV.push_back(pp->dzAssociatedPV());
            //std::cout<<" ######### PV Association Quality = "<< pp->pvAssociationQuality() <<" ######### "<<" PV id = " << pp->fromPV() <<" ######### "<<" Ref. Vertex i = " << pp->vertexRef().key() <<" ######### "<<std::endl;
            //std::cout<< " dzAssociatedPV = " << pp->dzAssociatedPV() << std::endl;
+           piIdx++;
+           piIndex.push_back(piIdx);
+           reco::TrackBase::CovarianceMatrix cm = pp->bestTrack()->covariance();
+           //std::cout<<" ************ CovarianceMatrix = "<<cm<<" ************ "<<std::endl;
+           covMatrix.push_back(cm);
+
+           double min_eig = 9999999;
+
+           /* Convert it from an SMatrix to a TMatrixD so we can get the eigenvalues. */
+           TMatrixDSym new_cm(cm.kRows);
+           for (unsigned int j = 0; j < cm.kRows; j++){
+            for (unsigned int k = 0; k < cm.kRows; k++){
+               new_cm(j,k) = cm(j,k);
+            }
+           }
+           /* Get the eigenvalues. */
+           TVectorD eig(cm.kRows);
+           new_cm.EigenVectors(eig);
+           for (unsigned int j = 0; j < cm.kRows; j++){
+               if (eig(j) < min_eig)
+                  min_eig = eig(j);
+           }
+           eigenValues.push_back(min_eig);
+
          }
        }
 
@@ -147,12 +174,12 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
             //if (ditrack_p4.M()>1.6) continue;
             float deltaR_ditrack = std::sqrt(reco::deltaR2(ditrack_p4,*TheOnia));
             pat::CompositeCandidate TheCandidate;
-            //if (! is_dimuon_ && ! thePhoton )TheCandidate.addUserInt("vStatus",0);
             //TheCandidate.addUserInt("iPVraw",iPV);
             TheCandidate.addDaughter(*TheOnia,"onia");
             TheCandidate.addUserData<reco::Track>( "track1", *Track1 );
             TheCandidate.addUserData<reco::Track>( "track2", *Track2 );
             //TheCandidate.addUserData<reco::Candidate::LorentzVector>("ditrack",ditrack_p4);
+
             TheCandidate.addUserFloat("ditrack_dRdimuon",deltaR_ditrack);
             TheCandidate.addUserFloat("track1_dRdimuon",deltaR_track1);
             TheCandidate.addUserFloat("track2_dRdimuon",deltaR_track2);
@@ -164,6 +191,43 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
             TheCandidate.addUserInt("track2_pvAssocQ",pvAssocQ[jj]);
             TheCandidate.addUserFloat("track1_dzAssocPV",dzAssocPV[ii]);
             TheCandidate.addUserFloat("track2_dzAssocPV",dzAssocPV[jj]);
+            TheCandidate.addUserInt("track1_Index",piIndex[ii]);
+            TheCandidate.addUserInt("track2_Index",piIndex[jj]);
+
+            TheCandidate.addUserFloat("track1_SQopQop", covMatrix[ii]( reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp ));
+            TheCandidate.addUserFloat("track1_SQopLam", covMatrix[ii]( reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda ));
+            TheCandidate.addUserFloat("track1_SQopPhi", covMatrix[ii]( reco::TrackBase::i_qoverp, reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track1_SQopDxy", covMatrix[ii]( reco::TrackBase::i_qoverp, reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track1_SQopDsz", covMatrix[ii]( reco::TrackBase::i_qoverp, reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track1_SLamLam", covMatrix[ii]( reco::TrackBase::i_lambda, reco::TrackBase::i_lambda ));
+            TheCandidate.addUserFloat("track1_SLamPhi", covMatrix[ii]( reco::TrackBase::i_lambda, reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track1_SLamDxy", covMatrix[ii]( reco::TrackBase::i_lambda, reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track1_SLamDsz", covMatrix[ii]( reco::TrackBase::i_lambda, reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track1_SPhiPhi", covMatrix[ii]( reco::TrackBase::i_phi   , reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track1_SPhiDxy", covMatrix[ii]( reco::TrackBase::i_phi   , reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track1_SPhiDsz", covMatrix[ii]( reco::TrackBase::i_phi   , reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track1_SDxyDxy", covMatrix[ii]( reco::TrackBase::i_dxy   , reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track1_SDxyDsz", covMatrix[ii]( reco::TrackBase::i_dxy   , reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track1_SDszDsz", covMatrix[ii]( reco::TrackBase::i_dsz   , reco::TrackBase::i_dsz    ));
+
+            TheCandidate.addUserFloat("track2_SQopQop", covMatrix[jj]( reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp ));
+            TheCandidate.addUserFloat("track2_SQopLam", covMatrix[jj]( reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda ));
+            TheCandidate.addUserFloat("track2_SQopPhi", covMatrix[jj]( reco::TrackBase::i_qoverp, reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track2_SQopDxy", covMatrix[jj]( reco::TrackBase::i_qoverp, reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track2_SQopDsz", covMatrix[jj]( reco::TrackBase::i_qoverp, reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track2_SLamLam", covMatrix[jj]( reco::TrackBase::i_lambda, reco::TrackBase::i_lambda ));
+            TheCandidate.addUserFloat("track2_SLamPhi", covMatrix[jj]( reco::TrackBase::i_lambda, reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track2_SLamDxy", covMatrix[jj]( reco::TrackBase::i_lambda, reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track2_SLamDsz", covMatrix[jj]( reco::TrackBase::i_lambda, reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track2_SPhiPhi", covMatrix[jj]( reco::TrackBase::i_phi   , reco::TrackBase::i_phi    ));
+            TheCandidate.addUserFloat("track2_SPhiDxy", covMatrix[jj]( reco::TrackBase::i_phi   , reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track2_SPhiDsz", covMatrix[jj]( reco::TrackBase::i_phi   , reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track2_SDxyDxy", covMatrix[jj]( reco::TrackBase::i_dxy   , reco::TrackBase::i_dxy    ));
+            TheCandidate.addUserFloat("track2_SDxyDsz", covMatrix[jj]( reco::TrackBase::i_dxy   , reco::TrackBase::i_dsz    ));
+            TheCandidate.addUserFloat("track2_SDszDsz", covMatrix[jj]( reco::TrackBase::i_dsz   , reco::TrackBase::i_dsz    ));
+
+            TheCandidate.addUserFloat("track1_eigenValues",eigenValues[ii]);
+            TheCandidate.addUserFloat("track2_eigenValues",eigenValues[jj]);
 
             TheCandidate.setCharge(Track1->charge()+Track2->charge());
             reco::Candidate::LorentzVector vCandidate = TheOnia->p4() + ditrack_p4;
@@ -193,19 +257,29 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
             KinematicConstrainedVertexFitter constVertexFitter;
             MultiTrackKinematicConstraint *onia_mtc = new  TwoTrackMassKinematicConstraint(mass_);
             RefCountedKinematicTree TheParticleTree = constVertexFitter.fit(allDaughters_,onia_mtc);
+            int validFit = 0;
+            int validStateFit = 0;
 
             TVector3 pvtx(thePrimaryV->position().x(),thePrimaryV->position().y(),0);
             TVector3 pvtx3D(thePrimaryV->position().x(),thePrimaryV->position().y(),thePrimaryV->position().z());
 
             if (TheParticleTree->isEmpty()) continue;
+            if (TheParticleTree->isValid()) validFit = 1;
+            //std::cout<<" ********* fit validation = "<<validFit<<" ********* "<<std::endl;
+            TheCandidate.addUserInt("validFit",validFit);
+
             TheParticleTree->movePointerToTheTop();
             RefCountedKinematicParticle TheParticle = TheParticleTree->currentParticle();
             RefCountedKinematicVertex TheDecayVertex = TheParticleTree->currentDecayVertex();
-            if (!TheParticle->currentState().isValid()) continue;
+            //if (!TheParticle->currentState().isValid()) continue;
+            if (TheParticle->currentState().isValid()) validStateFit = 1;
+            //std::cout<<" ********* particle state validation = "<<validStateFit<<" ********* "<<std::endl;
+            TheCandidate.addUserInt("validStateFit",validStateFit);
+
             //std::cout<<" ######### TheDecayVertex = "<<TheDecayVertex->position()<<" ######### "<<std::endl;
             if (TheParticle->currentState().mass() > CandidateMassCuts_[1] || TheParticle->currentState().mass() < CandidateMassCuts_[0]) continue;
             double Prob = ChiSquaredProbability((double)(TheDecayVertex->chiSquared()),(double)(TheDecayVertex->degreesOfFreedom()));
-            if(Prob<0.005) continue;
+            //if(Prob<0.005) continue;
 
             TheCandidate.addUserFloat("vMass",TheParticle->currentState().mass());
             TheCandidate.addUserFloat("vChi2",TheDecayVertex->chiSquared());
@@ -253,7 +327,6 @@ void OniaPseudoTrackTrackProducer::produce(edm::Event& event, const edm::EventSe
             vDiff3D[0] = vdiff3D.x(); vDiff3D[1] = vdiff3D.y(); vDiff3D[2] = vdiff3D.z(); // needed by Similarity method
             float lxyzErr = sqrt(ROOT::Math::Similarity(vDiff3D,vXYe)) / vdiff3D.Mag();
 
-            TheCandidate.addUserInt("vStatus",1);
             TheCandidate.addUserInt("isDimuon",is_dimuon_);
             TheCandidate.addUserFloat("vProb",Prob);
             TheCandidate.addUserFloat("cosAlpha",cosAlpha);

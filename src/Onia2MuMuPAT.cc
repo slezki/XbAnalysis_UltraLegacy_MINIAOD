@@ -21,6 +21,9 @@
 #include "TVector3.h"
 #include "Ponia/Onia/interface/OniaVtxReProducer.h"
 
+#include "TVectorD.h"
+#include "TMatrixDSym.h"
+
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
@@ -151,6 +154,11 @@ Onia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   myCand.addUserFloat("MassErr",MassWErr.error());
 
   if (myVertex.isValid()) {
+    myCand.addUserInt("validFit",1);
+  } else {
+    myCand.addUserInt("validFit",0);
+  }
+
     float vChi2 = myVertex.totalChiSquared();
     float vNDF  = myVertex.degreesOfFreedom();
     float vProb(TMath::Prob(vChi2,(int)vNDF));
@@ -168,7 +176,7 @@ Onia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     AlgebraicVector3 vpperp(pperp.x(),pperp.y(),0);
 
 
-    int lPV = 0;
+    int lPV = -1;
     //const reco::Vertex *PrimaryV;
     if (resolveAmbiguity_) {
 
@@ -361,6 +369,75 @@ Onia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     myCand.addUserInt("mu2_nvph",mu2_nvph);
     myCand.addUserInt("mu2_charge",mu2_charge);
 
+    reco::TrackBase::CovarianceMatrix cmMu1 = it->bestTrack()->covariance();
+    reco::TrackBase::CovarianceMatrix cmMu2 = it->bestTrack()->covariance();
+
+    myCand.addUserFloat("mu1_SQopQop", cmMu1( reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp ));
+    myCand.addUserFloat("mu1_SQopLam", cmMu1( reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda ));
+    myCand.addUserFloat("mu1_SQopPhi", cmMu1( reco::TrackBase::i_qoverp, reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu1_SQopDxy", cmMu1( reco::TrackBase::i_qoverp, reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu1_SQopDsz", cmMu1( reco::TrackBase::i_qoverp, reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu1_SLamLam", cmMu1( reco::TrackBase::i_lambda, reco::TrackBase::i_lambda ));
+    myCand.addUserFloat("mu1_SLamPhi", cmMu1( reco::TrackBase::i_lambda, reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu1_SLamDxy", cmMu1( reco::TrackBase::i_lambda, reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu1_SLamDsz", cmMu1( reco::TrackBase::i_lambda, reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu1_SPhiPhi", cmMu1( reco::TrackBase::i_phi   , reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu1_SPhiDxy", cmMu1( reco::TrackBase::i_phi   , reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu1_SPhiDsz", cmMu1( reco::TrackBase::i_phi   , reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu1_SDxyDxy", cmMu1( reco::TrackBase::i_dxy   , reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu1_SDxyDsz", cmMu1( reco::TrackBase::i_dxy   , reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu1_SDszDsz", cmMu1( reco::TrackBase::i_dsz   , reco::TrackBase::i_dsz    ));
+
+    myCand.addUserFloat("mu2_SQopQop", cmMu2( reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp ));
+    myCand.addUserFloat("mu2_SQopLam", cmMu2( reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda ));
+    myCand.addUserFloat("mu2_SQopPhi", cmMu2( reco::TrackBase::i_qoverp, reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu2_SQopDxy", cmMu2( reco::TrackBase::i_qoverp, reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu2_SQopDsz", cmMu2( reco::TrackBase::i_qoverp, reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu2_SLamLam", cmMu2( reco::TrackBase::i_lambda, reco::TrackBase::i_lambda ));
+    myCand.addUserFloat("mu2_SLamPhi", cmMu2( reco::TrackBase::i_lambda, reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu2_SLamDxy", cmMu2( reco::TrackBase::i_lambda, reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu2_SLamDsz", cmMu2( reco::TrackBase::i_lambda, reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu2_SPhiPhi", cmMu2( reco::TrackBase::i_phi   , reco::TrackBase::i_phi    ));
+    myCand.addUserFloat("mu2_SPhiDxy", cmMu2( reco::TrackBase::i_phi   , reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu2_SPhiDsz", cmMu2( reco::TrackBase::i_phi   , reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu2_SDxyDxy", cmMu2( reco::TrackBase::i_dxy   , reco::TrackBase::i_dxy    ));
+    myCand.addUserFloat("mu2_SDxyDsz", cmMu2( reco::TrackBase::i_dxy   , reco::TrackBase::i_dsz    ));
+    myCand.addUserFloat("mu2_SDszDsz", cmMu2( reco::TrackBase::i_dsz   , reco::TrackBase::i_dsz    ));
+
+    double min_eig_mu1 = 9999999;
+    double min_eig_mu2 = 9999999;
+
+     /* Convert it from an SMatrix to a TMatrixD so we can get the eigenvalues. */
+     TMatrixDSym new_cmMu1(cmMu1.kRows);
+     for (unsigned int j = 0; j < cmMu1.kRows; j++){
+      for (unsigned int k = 0; k < cmMu1.kRows; k++){
+         new_cmMu1(j,k) = cmMu1(j,k);
+      }
+     }
+     /* Get the eigenvalues. */
+     TVectorD eig_mu1(cmMu1.kRows);
+     new_cmMu1.EigenVectors(eig_mu1);
+     for (unsigned int j = 0; j < cmMu1.kRows; j++){
+         if (eig_mu1(j) < min_eig_mu1)
+            min_eig_mu1 = eig_mu1(j);
+     }
+     TMatrixDSym new_cmMu2(cmMu2.kRows);
+     for (unsigned int j = 0; j < cmMu2.kRows; j++){
+      for (unsigned int k = 0; k < cmMu2.kRows; k++){
+         new_cmMu2(j,k) = cmMu2(j,k);
+      }
+     }
+     /* Get the eigenvalues. */
+     TVectorD eig_mu2(cmMu2.kRows);
+     new_cmMu2.EigenVectors(eig_mu2);
+     for (unsigned int j = 0; j < cmMu2.kRows; j++){
+         if (eig_mu2(j) < min_eig_mu2)
+            min_eig_mu2 = eig_mu2(j);
+     }
+
+    myCand.addUserFloat("mu1_eigenValues",min_eig_mu1);
+    myCand.addUserFloat("mu2_eigenValues",min_eig_mu2);
+
     ///DCA
     TrajectoryStateClosestToPoint mu1TS = t_tks[0].impactPointTSCP();
     TrajectoryStateClosestToPoint mu2TS = t_tks[1].impactPointTSCP();
@@ -432,25 +509,7 @@ Onia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (addCommonVertex_) {
       myCand.addUserData("commonVertex",Vertex(myVertex));
     }
-  } else {
-    myCand.addUserFloat("vNChi2",-1);
-    myCand.addUserFloat("vProb", -1);
-    myCand.addUserFloat("ppdlPV",-100);
-          myCand.addUserFloat("ppdlErrPV",-100);
-    myCand.addUserFloat("cosAlpha",-100);
-    myCand.addUserFloat("ppdlBS",-100);
-          myCand.addUserFloat("ppdlErrBS",-100);
-          myCand.addUserFloat("DCA", -1 );
-    if (addCommonVertex_) {
-      myCand.addUserData("commonVertex",Vertex());
-    }
-    if (addMuonlessPrimaryVertex_) {
-            myCand.addUserData("muonlessPV",Vertex());
-    } else {
-      myCand.addUserData("PVwithmuons",Vertex());
-      //std::cout<<" PVwithmuons - 2 "<<std::endl;
-    }
-  } 
+  //} 
       }
 
       // ---- MC Truth, if enabled ----
@@ -501,6 +560,7 @@ Onia2MuMuPAT::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
       // ---- Push back output ----  
+      myCand.addUserInt("diMuIndex",nEvents);
       oniaOutput->push_back(myCand);
       //intMuon++;
       //std::cout<<" intMuon end = "<< intMuon <<std::endl;

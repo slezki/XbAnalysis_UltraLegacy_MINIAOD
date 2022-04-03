@@ -43,7 +43,7 @@ class OniaRecoTrackTrackRootupler : public edm::EDAnalyzer {
   const int  candidate_pdgid_, onia_pdgid_, ditrack_pdgid_, track1_pdgid_, track2_pdgid_;
   const bool isMC_,OnlyBest_;
 
-  UInt_t run, event, nCandPerEvent, numPrimaryVertices, trigger;  
+  UInt_t run, event, nCandPerEvent, numPrimaryVertices, trigger, luminosityBlock;  
 
   TLorentzVector candidate_p4;
   TLorentzVector onia_p4;
@@ -72,14 +72,53 @@ class OniaRecoTrackTrackRootupler : public edm::EDAnalyzer {
 
   Double_t thePrimaryV_X, thePrimaryV_Y, thePrimaryV_Z, TheDecayVertex_X, TheDecayVertex_Y, TheDecayVertex_Z, thePrimaryV_2D_position, thePrimaryV_3D_position, TheDecayVertex_2D_position, TheDecayVertex_3D_position, TheVertexDistance_2D, TheVertexDistance_3D;
 
-  Double_t track1_d0, track1_d0Err, track1_dz, track1_dxy, track1_dzErr, track1_dxyErr, track1_charge, track1_dzAssocPV;
-  Double_t track2_d0, track2_d0Err, track2_dz, track2_dxy, track2_dzErr, track2_dxyErr, track2_charge, track2_dzAssocPV;
+  Double_t track1_d0, track1_d0Err, track1_dz, track1_dxy, track1_dzErr, track1_dxyErr, track1_dzAssocPV;
+  Double_t track2_d0, track2_d0Err, track2_dz, track2_dxy, track2_dzErr, track2_dxyErr, track2_dzAssocPV;
   Double_t dimuon_vProb, dimuon_vChi2, dimuon_DCA, dimuon_ctauPV, dimuon_ctauErrPV, dimuon_cosAlpha, dimuon_nSigma;
   Double_t track2_dRdimuon, track1_dRdimuon, ditrack_dRdimuon;
 
+  Int_t validFit, validStateFit;
+  Int_t candidate_validFit, candidate_validStateFit;
+
+  Int_t track1_charge, track2_charge;
   Int_t track1_PV, track2_PV, track1_refVtx, track2_refVtx, track1_pvAssocQ, track2_pvAssocQ;
 
-  Int_t Chi_index, dimuon_vertexWeight, iPVwithmuons, diMuInChi_index;
+  Int_t Chi_index, dimuon_vertexWeight, iPVwithmuons, diMuInChi_index, dimuon_diMuIndx;
+  Int_t track1_Index, track2_Index;
+  Int_t dimuon_validFit;
+  Int_t ups_validFit;
+  
+  Double_t track1_SQopQop, track1_SQopLam, track1_SQopPhi, track1_SQopDxy, track1_SQopDsz, track1_SLamLam;
+  Double_t track1_SLamPhi, track1_SLamDxy, track1_SLamDsz, track1_SPhiPhi, track1_SPhiDxy, track1_SPhiDsz;
+  Double_t track1_SDxyDxy, track1_SDxyDsz, track1_SDszDsz;
+  
+  Double_t track2_SQopQop, track2_SQopLam, track2_SQopPhi, track2_SQopDxy, track2_SQopDsz, track2_SLamLam;
+  Double_t track2_SLamPhi, track2_SLamDxy, track2_SLamDsz, track2_SPhiPhi, track2_SPhiDxy, track2_SPhiDsz;
+  Double_t track2_SDxyDxy, track2_SDxyDsz, track2_SDszDsz;
+
+  Double_t track1_eigenValues, track2_eigenValues;
+  
+  Double_t mu1_SQopQop, mu1_SQopLam, mu1_SQopPhi, mu1_SQopDxy, mu1_SQopDsz, mu1_SLamLam;
+  Double_t mu1_SLamPhi, mu1_SLamDxy, mu1_SLamDsz, mu1_SPhiPhi, mu1_SPhiDxy, mu1_SPhiDsz;
+  Double_t mu1_SDxyDxy, mu1_SDxyDsz, mu1_SDszDsz;
+  
+  Double_t mu2_SQopQop, mu2_SQopLam, mu2_SQopPhi, mu2_SQopDxy, mu2_SQopDsz, mu2_SLamLam;
+  Double_t mu2_SLamPhi, mu2_SLamDxy, mu2_SLamDsz, mu2_SPhiPhi, mu2_SPhiDxy, mu2_SPhiDsz;
+  Double_t mu2_SDxyDxy, mu2_SDxyDsz, mu2_SDszDsz;
+
+  Double_t mu1_eigenValues, mu2_eigenValues;
+  
+  Int_t mu1_charge_, mu2_charge_;
+
+  Double_t ups_mu1_SQopQop, ups_mu1_SQopLam, ups_mu1_SQopPhi, ups_mu1_SQopDxy, ups_mu1_SQopDsz, ups_mu1_SLamLam;
+  Double_t ups_mu1_SLamPhi, ups_mu1_SLamDxy, ups_mu1_SLamDsz, ups_mu1_SPhiPhi, ups_mu1_SPhiDxy, ups_mu1_SPhiDsz;
+  Double_t ups_mu1_SDxyDxy, ups_mu1_SDxyDsz, ups_mu1_SDszDsz;
+  
+  Double_t ups_mu2_SQopQop, ups_mu2_SQopLam, ups_mu2_SQopPhi, ups_mu2_SQopDxy, ups_mu2_SQopDsz, ups_mu2_SLamLam;
+  Double_t ups_mu2_SLamPhi, ups_mu2_SLamDxy, ups_mu2_SLamDsz, ups_mu2_SPhiPhi, ups_mu2_SPhiDxy, ups_mu2_SPhiDsz;
+  Double_t ups_mu2_SDxyDxy, ups_mu2_SDxyDsz, ups_mu2_SDszDsz;
+
+  Double_t ups_mu1_eigenValues, ups_mu2_eigenValues;
 
   Double_t Chi_dZ, Chi_dM;
 
@@ -111,6 +150,7 @@ class OniaRecoTrackTrackRootupler : public edm::EDAnalyzer {
   Double_t ups_lxyPV, ups_lxyErrPV, ups_ctauBS, ups_ctauErrBS, ups_lxyBS, ups_lxyErrBS;
   Double_t mu1_pt, mu1_ptErr, mu1_d0, mu1_d0Err, mu1_dz, mu1_dzErr, mu1_dxy, mu1_dxyErr, mu2_pt, mu2_ptErr, mu2_d0, mu2_d0Err, mu2_dz, mu2_dzErr, mu2_dxy, mu2_dxyErr;
   Int_t mu1_nvsh, mu1_nvph, mu2_nvsh, mu2_nvph, iPVwithmuons_ups, mu1_charge, mu2_charge;
+  Int_t ups_diMuIndx;
 
   TTree* TheTree;
   TTree* UpsTree;
@@ -158,6 +198,7 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
 
         TheTree->Branch("run",                &run,                "run/I");
         TheTree->Branch("event",              &event,              "event/I");
+        TheTree->Branch("luminosityBlock",              &luminosityBlock,              "luminosityBlock/I");
         TheTree->Branch("nCandPerEvent", &nCandPerEvent, "nCandPerEvent/I");
         TheTree->Branch("numPrimaryVertices", &numPrimaryVertices, "numPrimaryVertices/I");
         TheTree->Branch("trigger",            &trigger,            "trigger/I");
@@ -201,6 +242,7 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
 
         TheTree->Branch("iPVwithmuons",        &iPVwithmuons,        "iPVwithmuons/I");
 
+        TheTree->Branch("dimuon_diMuIndx",       &dimuon_diMuIndx,        "dimuon_diMuIndx/I");
         TheTree->Branch("dimuon_vertexWeight",        &dimuon_vertexWeight,        "dimuon_vertexWeight/I");
         TheTree->Branch("dimuon_vProb",        &dimuon_vProb,        "dimuon_vProb/D");
         TheTree->Branch("dimuon_vNChi2",       &dimuon_vChi2,        "dimuon_vNChi2/D");
@@ -222,6 +264,9 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         TheTree->Branch("candidate_lxyz",       &candidate_lxyz,         "candidate_lxyz/D");
         TheTree->Branch("candidate_lxyzErr",    &candidate_lxyzErr,      "candidate_lxyzErr/D");
 
+        TheTree->Branch("candidate_validFit",     &candidate_validFit,       "candidate_validFit/I");
+        TheTree->Branch("candidate_validStateFit",     &candidate_validStateFit,       "candidate_validStateFit/I");
+
         TheTree->Branch("thePrimaryV_X",      &thePrimaryV_X,        "thePrimaryV_X/D");
         TheTree->Branch("thePrimaryV_Y",      &thePrimaryV_Y,        "thePrimaryV_Y/D");
         TheTree->Branch("thePrimaryV_Z",      &thePrimaryV_Z,        "thePrimaryV_Z/D");
@@ -235,6 +280,9 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         TheTree->Branch("TheVertexDistance_2D",      &TheVertexDistance_2D,        "TheVertexDistance_2D/D");
         TheTree->Branch("TheVertexDistance_3D",      &TheVertexDistance_3D,        "TheVertexDistance_3D/D");
 
+        TheTree->Branch("track1_Index",    &track1_Index,    "track1_Index/I");
+        TheTree->Branch("track2_Index",    &track2_Index,    "track2_Index/I");
+
         TheTree->Branch("track1_d0",    &track1_d0,    "track1_d0/D");
         TheTree->Branch("track1_d0Err", &track1_d0Err, "track1_d0Err/D");
         TheTree->Branch("track1_dz",    &track1_dz,    "track1_dz/D");
@@ -244,7 +292,7 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         TheTree->Branch("track1_nvsh",  &track1_nvsh,  "track1_nvsh/I");
         TheTree->Branch("track1_nvph",  &track1_nvph,  "track1_nvph/I");
         TheTree->Branch("track1_dRdimuon",  &track1_dRdimuon,  "track1_dRdimuon/D");
-        TheTree->Branch("track1_charge",  &track1_charge,  "track1_charge/D");
+        TheTree->Branch("track1_charge",  &track1_charge,  "track1_charge/I");
         TheTree->Branch("track1_PV",  &track1_PV,  "track1_PV/I");
         TheTree->Branch("track1_refVtx",  &track1_refVtx,  "track1_refVtx/I");
         TheTree->Branch("track1_pvAssocQ",  &track1_pvAssocQ,  "track1_pvAssocQ/I");
@@ -259,13 +307,97 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         TheTree->Branch("track2_nvsh",  &track2_nvsh,  "track2_nvsh/I");
         TheTree->Branch("track2_nvph",  &track2_nvph,  "track2_nvph/I");
         TheTree->Branch("track2_dRdimuon",  &track2_dRdimuon,  "track2_dRdimuon/D");
-        TheTree->Branch("track2_charge",  &track2_charge,  "track2_charge/D");
+        TheTree->Branch("track2_charge",  &track2_charge,  "track2_charge/I");
         TheTree->Branch("track2_PV",  &track2_PV,  "track2_PV/I");
         TheTree->Branch("track2_refVtx",  &track2_refVtx,  "track2_refVtx/I");
         TheTree->Branch("track2_pvAssocQ",  &track2_pvAssocQ,  "track2_pvAssocQ/I");
         TheTree->Branch("track2_dzAssocPV",    &track2_dzAssocPV,    "track2_dzAssocPV/D");
 
         TheTree->Branch("ditrack_dRdimuon",  &ditrack_dRdimuon,  "ditrack_dRdimuon/D");
+
+        TheTree->Branch("track1_eigenValues",        &track1_eigenValues,        "track1_eigenValues/D");
+        TheTree->Branch("track2_eigenValues",        &track2_eigenValues,        "track2_eigenValues/D");
+        
+        TheTree->Branch("track1_SQopQop",        &track1_SQopQop,        "track1_SQopQop/D");
+        TheTree->Branch("track1_SQopLam",        &track1_SQopLam,        "track1_SQopLam/D");
+        TheTree->Branch("track1_SQopPhi",        &track1_SQopPhi,        "track1_SQopPhi/D");
+        TheTree->Branch("track1_SQopDxy",        &track1_SQopDxy,        "track1_SQopDxy/D");
+        TheTree->Branch("track1_SQopDsz",        &track1_SQopDsz,        "track1_SQopDsz/D");
+
+        TheTree->Branch("track1_SLamLam",        &track1_SLamLam,        "track1_SLamLam/D");
+        TheTree->Branch("track1_SLamPhi",        &track1_SLamPhi,        "track1_SLamPhi/D");
+        TheTree->Branch("track1_SLamDxy",        &track1_SLamDxy,        "track1_SLamDxy/D");
+        TheTree->Branch("track1_SLamDsz",        &track1_SLamDsz,        "track1_SLamDsz/D");
+        TheTree->Branch("track1_SPhiPhi",        &track1_SPhiPhi,        "track1_SPhiPhi/D");
+
+        TheTree->Branch("track1_SPhiDxy",        &track1_SPhiDxy,        "track1_SPhiDxy/D");
+        TheTree->Branch("track1_SPhiDsz",        &track1_SPhiDsz,        "track1_SPhiDsz/D");
+        TheTree->Branch("track1_SDxyDxy",        &track1_SDxyDxy,        "track1_SDxyDxy/D");
+        TheTree->Branch("track1_SDxyDsz",        &track1_SDxyDsz,        "track1_SDxyDsz/D");
+        TheTree->Branch("track1_SDszDsz",        &track1_SDszDsz,        "track1_SDszDsz/D");
+
+        TheTree->Branch("track2_SQopQop",        &track2_SQopQop,        "track2_SQopQop/D");
+        TheTree->Branch("track2_SQopLam",        &track2_SQopLam,        "track2_SQopLam/D");
+        TheTree->Branch("track2_SQopPhi",        &track2_SQopPhi,        "track2_SQopPhi/D");
+        TheTree->Branch("track2_SQopDxy",        &track2_SQopDxy,        "track2_SQopDxy/D");
+        TheTree->Branch("track2_SQopDsz",        &track2_SQopDsz,        "track2_SQopDsz/D");
+
+        TheTree->Branch("track2_SLamLam",        &track2_SLamLam,        "track2_SLamLam/D");
+        TheTree->Branch("track2_SLamPhi",        &track2_SLamPhi,        "track2_SLamPhi/D");
+        TheTree->Branch("track2_SLamDxy",        &track2_SLamDxy,        "track2_SLamDxy/D");
+        TheTree->Branch("track2_SLamDsz",        &track2_SLamDsz,        "track2_SLamDsz/D");
+        TheTree->Branch("track2_SPhiPhi",        &track2_SPhiPhi,        "track2_SPhiPhi/D");
+
+        TheTree->Branch("track2_SPhiDxy",        &track2_SPhiDxy,        "track2_SPhiDxy/D");
+        TheTree->Branch("track2_SPhiDsz",        &track2_SPhiDsz,        "track2_SPhiDsz/D");
+        TheTree->Branch("track2_SDxyDxy",        &track2_SDxyDxy,        "track2_SDxyDxy/D");
+        TheTree->Branch("track2_SDxyDsz",        &track2_SDxyDsz,        "track2_SDxyDsz/D");
+        TheTree->Branch("track2_SDszDsz",        &track2_SDszDsz,        "track2_SDszDsz/D");
+
+        TheTree->Branch("dimuon_validFit",     &dimuon_validFit,       "dimuon_validFit/I");
+
+        TheTree->Branch("mu1_charge",        &mu1_charge_,        "mu1_charge/I");
+        TheTree->Branch("mu2_charge",        &mu2_charge_,        "mu2_charge/I");
+
+        TheTree->Branch("mu1_eigenValues",        &mu1_eigenValues,        "mu1_eigenValues/D");
+        TheTree->Branch("mu2_eigenValues",        &mu2_eigenValues,        "mu2_eigenValues/D");
+        
+        TheTree->Branch("mu1_SQopQop",        &mu1_SQopQop,        "mu1_SQopQop/D");
+        TheTree->Branch("mu1_SQopLam",        &mu1_SQopLam,        "mu1_SQopLam/D");
+        TheTree->Branch("mu1_SQopPhi",        &mu1_SQopPhi,        "mu1_SQopPhi/D");
+        TheTree->Branch("mu1_SQopDxy",        &mu1_SQopDxy,        "mu1_SQopDxy/D");
+        TheTree->Branch("mu1_SQopDsz",        &mu1_SQopDsz,        "mu1_SQopDsz/D");
+
+        TheTree->Branch("mu1_SLamLam",        &mu1_SLamLam,        "mu1_SLamLam/D");
+        TheTree->Branch("mu1_SLamPhi",        &mu1_SLamPhi,        "mu1_SLamPhi/D");
+        TheTree->Branch("mu1_SLamDxy",        &mu1_SLamDxy,        "mu1_SLamDxy/D");
+        TheTree->Branch("mu1_SLamDsz",        &mu1_SLamDsz,        "mu1_SLamDsz/D");
+        TheTree->Branch("mu1_SPhiPhi",        &mu1_SPhiPhi,        "mu1_SPhiPhi/D");
+
+        TheTree->Branch("mu1_SPhiDxy",        &mu1_SPhiDxy,        "mu1_SPhiDxy/D");
+        TheTree->Branch("mu1_SPhiDsz",        &mu1_SPhiDsz,        "mu1_SPhiDsz/D");
+        TheTree->Branch("mu1_SDxyDxy",        &mu1_SDxyDxy,        "mu1_SDxyDxy/D");
+        TheTree->Branch("mu1_SDxyDsz",        &mu1_SDxyDsz,        "mu1_SDxyDsz/D");
+        TheTree->Branch("mu1_SDszDsz",        &mu1_SDszDsz,        "mu1_SDszDsz/D");
+
+        TheTree->Branch("mu2_SQopQop",        &mu2_SQopQop,        "mu2_SQopQop/D");
+        TheTree->Branch("mu2_SQopLam",        &mu2_SQopLam,        "mu2_SQopLam/D");
+        TheTree->Branch("mu2_SQopPhi",        &mu2_SQopPhi,        "mu2_SQopPhi/D");
+        TheTree->Branch("mu2_SQopDxy",        &mu2_SQopDxy,        "mu2_SQopDxy/D");
+        TheTree->Branch("mu2_SQopDsz",        &mu2_SQopDsz,        "mu2_SQopDsz/D");
+
+        TheTree->Branch("mu2_SLamLam",        &mu2_SLamLam,        "mu2_SLamLam/D");
+        TheTree->Branch("mu2_SLamPhi",        &mu2_SLamPhi,        "mu2_SLamPhi/D");
+        TheTree->Branch("mu2_SLamDxy",        &mu2_SLamDxy,        "mu2_SLamDxy/D");
+        TheTree->Branch("mu2_SLamDsz",        &mu2_SLamDsz,        "mu2_SLamDsz/D");
+        TheTree->Branch("mu2_SPhiPhi",        &mu2_SPhiPhi,        "mu2_SPhiPhi/D");
+
+        TheTree->Branch("mu2_SPhiDxy",        &mu2_SPhiDxy,        "mu2_SPhiDxy/D");
+        TheTree->Branch("mu2_SPhiDsz",        &mu2_SPhiDsz,        "mu2_SPhiDsz/D");
+        TheTree->Branch("mu2_SDxyDxy",        &mu2_SDxyDxy,        "mu2_SDxyDxy/D");
+        TheTree->Branch("mu2_SDxyDsz",        &mu2_SDxyDsz,        "mu2_SDxyDsz/D");
+        TheTree->Branch("mu2_SDszDsz",        &mu2_SDszDsz,        "mu2_SDszDsz/D");
+
 
 	if(isMC_)
 	  {
@@ -297,6 +429,7 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
 
         UpsTree->Branch("iPVwithmuons_ups",        &iPVwithmuons_ups,        "iPVwithmuons_ups/I");
 
+        UpsTree->Branch("ups_diMuIndx",       &ups_diMuIndx,        "ups_diMuIndx/I");
         UpsTree->Branch("ups_vertexWeight",        &ups_vertexWeight,        "ups_vertexWeight/D");
         UpsTree->Branch("ups_vProb",        &ups_vProb,        "ups_vProb/D");
         UpsTree->Branch("ups_vMass",        &ups_vMass,        "ups_vMass/D");
@@ -311,6 +444,8 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         UpsTree->Branch("ups_ctauErrBS",    &ups_ctauErrBS,    "ups_ctauErrBS/D");
         UpsTree->Branch("ups_lxyBS",        &ups_lxyBS,          "ups_lxyBS/D");
         UpsTree->Branch("ups_lxyErrBS",     &ups_lxyErrBS,       "ups_lxyErrBS/D");
+
+        UpsTree->Branch("ups_validFit",     &ups_validFit,       "ups_validFit/I");
 
         UpsTree->Branch("mu1_pt",    &mu1_pt,    "mu1_pt/D");
         UpsTree->Branch("mu1_ptErr",    &mu1_ptErr,    "mu1_ptErr/D");
@@ -336,6 +471,47 @@ OnlyBest_(iConfig.getParameter<bool>("OnlyBest"))
         UpsTree->Branch("mu2_nvph",  &mu2_nvph,  "mu2_nvph/I");
         UpsTree->Branch("mu2_charge",  &mu2_charge,  "mu2_charge/I");
 
+        UpsTree->Branch("ups_mu1_eigenValues",        &ups_mu1_eigenValues,        "ups_mu1_eigenValues/D");
+        UpsTree->Branch("ups_mu2_eigenValues",        &ups_mu2_eigenValues,        "ups_mu2_eigenValues/D");
+        
+        UpsTree->Branch("ups_mu1_SQopQop",        &ups_mu1_SQopQop,        "ups_mu1_SQopQop/D");
+        UpsTree->Branch("ups_mu1_SQopLam",        &ups_mu1_SQopLam,        "ups_mu1_SQopLam/D");
+        UpsTree->Branch("ups_mu1_SQopPhi",        &ups_mu1_SQopPhi,        "ups_mu1_SQopPhi/D");
+        UpsTree->Branch("ups_mu1_SQopDxy",        &ups_mu1_SQopDxy,        "ups_mu1_SQopDxy/D");
+        UpsTree->Branch("ups_mu1_SQopDsz",        &ups_mu1_SQopDsz,        "ups_mu1_SQopDsz/D");
+
+        UpsTree->Branch("ups_mu1_SLamLam",        &ups_mu1_SLamLam,        "ups_mu1_SLamLam/D");
+        UpsTree->Branch("ups_mu1_SLamPhi",        &ups_mu1_SLamPhi,        "ups_mu1_SLamPhi/D");
+        UpsTree->Branch("ups_mu1_SLamDxy",        &ups_mu1_SLamDxy,        "ups_mu1_SLamDxy/D");
+        UpsTree->Branch("ups_mu1_SLamDsz",        &ups_mu1_SLamDsz,        "ups_mu1_SLamDsz/D");
+        UpsTree->Branch("ups_mu1_SPhiPhi",        &ups_mu1_SPhiPhi,        "ups_mu1_SPhiPhi/D");
+
+        UpsTree->Branch("ups_mu1_SPhiDxy",        &ups_mu1_SPhiDxy,        "ups_mu1_SPhiDxy/D");
+        UpsTree->Branch("ups_mu1_SPhiDsz",        &ups_mu1_SPhiDsz,        "ups_mu1_SPhiDsz/D");
+        UpsTree->Branch("ups_mu1_SDxyDxy",        &ups_mu1_SDxyDxy,        "ups_mu1_SDxyDxy/D");
+        UpsTree->Branch("ups_mu1_SDxyDsz",        &ups_mu1_SDxyDsz,        "ups_mu1_SDxyDsz/D");
+        UpsTree->Branch("ups_mu1_SDszDsz",        &ups_mu1_SDszDsz,        "ups_mu1_SDszDsz/D");
+
+        UpsTree->Branch("ups_mu2_SQopQop",        &ups_mu2_SQopQop,        "ups_mu2_SQopQop/D");
+        UpsTree->Branch("ups_mu2_SQopLam",        &ups_mu2_SQopLam,        "ups_mu2_SQopLam/D");
+        UpsTree->Branch("ups_mu2_SQopPhi",        &ups_mu2_SQopPhi,        "ups_mu2_SQopPhi/D");
+        UpsTree->Branch("ups_mu2_SQopDxy",        &ups_mu2_SQopDxy,        "ups_mu2_SQopDxy/D");
+        UpsTree->Branch("ups_mu2_SQopDsz",        &ups_mu2_SQopDsz,        "ups_mu2_SQopDsz/D");
+
+        UpsTree->Branch("ups_mu2_SLamLam",        &ups_mu2_SLamLam,        "ups_mu2_SLamLam/D");
+        UpsTree->Branch("ups_mu2_SLamPhi",        &ups_mu2_SLamPhi,        "ups_mu2_SLamPhi/D");
+        UpsTree->Branch("ups_mu2_SLamDxy",        &ups_mu2_SLamDxy,        "ups_mu2_SLamDxy/D");
+        UpsTree->Branch("ups_mu2_SLamDsz",        &ups_mu2_SLamDsz,        "ups_mu2_SLamDsz/D");
+        UpsTree->Branch("ups_mu2_SPhiPhi",        &ups_mu2_SPhiPhi,        "ups_mu2_SPhiPhi/D");
+
+        UpsTree->Branch("ups_mu2_SPhiDxy",        &ups_mu2_SPhiDxy,        "ups_mu2_SPhiDxy/D");
+        UpsTree->Branch("ups_mu2_SPhiDsz",        &ups_mu2_SPhiDsz,        "ups_mu2_SPhiDsz/D");
+        UpsTree->Branch("ups_mu2_SDxyDxy",        &ups_mu2_SDxyDxy,        "ups_mu2_SDxyDxy/D");
+        UpsTree->Branch("ups_mu2_SDxyDsz",        &ups_mu2_SDxyDsz,        "ups_mu2_SDxyDsz/D");
+        UpsTree->Branch("ups_mu2_SDszDsz",        &ups_mu2_SDszDsz,        "ups_mu2_SDszDsz/D");
+
+
+
 }
 
 void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -356,6 +532,7 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
   numPrimaryVertices = ThePrimaryVertices->size();
   run = iEvent.id().run();
   event = iEvent.id().event();
+  luminosityBlock = iEvent.id().luminosityBlock();
 
   gen_onia_p4.SetPtEtaPhiM(0,0,0,0);
   gen_photon_p4.SetPtEtaPhiM(0,0,0,0);
@@ -509,6 +686,9 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
       candidate_lxyz      = TheCandidate_.userFloat("lxyz");
       candidate_lxyzErr   = TheCandidate_.userFloat("lxyzErr");
 
+      candidate_validFit = TheCandidate_.userInt("validFit");
+      candidate_validStateFit = TheCandidate_.userInt("validStateFit");
+
       thePrimaryV_X = TheCandidate_.userFloat("thePrimaryV_X");
       thePrimaryV_Y = TheCandidate_.userFloat("thePrimaryV_Y");
       thePrimaryV_Z = TheCandidate_.userFloat("thePrimaryV_Z");
@@ -534,6 +714,43 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
 
       track1_dzAssocPV = TheCandidate_.userFloat("track1_dzAssocPV");
       track2_dzAssocPV = TheCandidate_.userFloat("track2_dzAssocPV");
+
+      //collect covariance matrix
+      track1_SQopQop = TheCandidate_.userFloat("track1_SQopQop");
+      track1_SQopLam = TheCandidate_.userFloat("track1_SQopLam");
+      track1_SQopPhi = TheCandidate_.userFloat("track1_SQopPhi");
+      track1_SQopDxy = TheCandidate_.userFloat("track1_SQopDxy");
+      track1_SQopDsz = TheCandidate_.userFloat("track1_SQopDsz");
+      track1_SLamLam = TheCandidate_.userFloat("track1_SLamLam");
+      track1_SLamPhi = TheCandidate_.userFloat("track1_SLamPhi");
+      track1_SLamDxy = TheCandidate_.userFloat("track1_SLamDxy");
+      track1_SLamDsz = TheCandidate_.userFloat("track1_SLamDsz");
+      track1_SPhiPhi = TheCandidate_.userFloat("track1_SPhiPhi");
+      track1_SPhiDxy = TheCandidate_.userFloat("track1_SPhiDxy");
+      track1_SPhiDsz = TheCandidate_.userFloat("track1_SPhiDsz");
+      track1_SDxyDxy = TheCandidate_.userFloat("track1_SDxyDxy");
+      track1_SDxyDsz = TheCandidate_.userFloat("track1_SDxyDsz");
+      track1_SDszDsz = TheCandidate_.userFloat("track1_SDszDsz");
+
+      track2_SQopQop = TheCandidate_.userFloat("track2_SQopQop");
+      track2_SQopLam = TheCandidate_.userFloat("track2_SQopLam");
+      track2_SQopPhi = TheCandidate_.userFloat("track2_SQopPhi");
+      track2_SQopDxy = TheCandidate_.userFloat("track2_SQopDxy");
+      track2_SQopDsz = TheCandidate_.userFloat("track2_SQopDsz");
+      track2_SLamLam = TheCandidate_.userFloat("track2_SLamLam");
+      track2_SLamPhi = TheCandidate_.userFloat("track2_SLamPhi");
+      track2_SLamDxy = TheCandidate_.userFloat("track2_SLamDxy");
+      track2_SLamDsz = TheCandidate_.userFloat("track2_SLamDsz");
+      track2_SPhiPhi = TheCandidate_.userFloat("track2_SPhiPhi");
+      track2_SPhiDxy = TheCandidate_.userFloat("track2_SPhiDxy");
+      track2_SPhiDsz = TheCandidate_.userFloat("track2_SPhiDsz");
+      track2_SDxyDxy = TheCandidate_.userFloat("track2_SDxyDxy");
+      track2_SDxyDsz = TheCandidate_.userFloat("track2_SDxyDsz");
+      track2_SDszDsz = TheCandidate_.userFloat("track2_SDszDsz");
+
+      track1_eigenValues = TheCandidate_.userFloat("track1_eigenValues");
+      track2_eigenValues = TheCandidate_.userFloat("track2_eigenValues");
+
 
       const pat::CompositeCandidate *TheOnia_   = nullptr;
       const pat::CompositeCandidate *ThePhoton_ = nullptr;
@@ -613,6 +830,7 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
 
       iPVwithmuons = TheDimuon_->userInt("iPV");
 
+      dimuon_diMuIndx     = TheDimuon_->userInt("diMuIndex");
       dimuon_vertexWeight = TheDimuon_->userFloat("vertexWeight");
       dimuon_vProb        = TheDimuon_->userFloat("vProb");
       dimuon_vChi2        = TheDimuon_->userFloat("vNChi2");
@@ -620,6 +838,46 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
       dimuon_ctauPV       = TheDimuon_->userFloat("ppdlPV");
       dimuon_ctauErrPV    = TheDimuon_->userFloat("ppdlErrPV");
       dimuon_cosAlpha     = TheDimuon_->userFloat("cosAlpha");
+
+      dimuon_validFit = TheDimuon_->userInt("validFit");
+
+      mu1_charge_ = TheDimuon_->userInt("mu1_charge");
+      mu2_charge_ = TheDimuon_->userInt("mu2_charge");
+
+      mu1_SQopQop = TheDimuon_->userFloat("mu1_SQopQop");
+      mu1_SQopLam = TheDimuon_->userFloat("mu1_SQopLam");
+      mu1_SQopPhi = TheDimuon_->userFloat("mu1_SQopPhi");
+      mu1_SQopDxy = TheDimuon_->userFloat("mu1_SQopDxy");
+      mu1_SQopDsz = TheDimuon_->userFloat("mu1_SQopDsz");
+      mu1_SLamLam = TheDimuon_->userFloat("mu1_SLamLam");
+      mu1_SLamPhi = TheDimuon_->userFloat("mu1_SLamPhi");
+      mu1_SLamDxy = TheDimuon_->userFloat("mu1_SLamDxy");
+      mu1_SLamDsz = TheDimuon_->userFloat("mu1_SLamDsz");
+      mu1_SPhiPhi = TheDimuon_->userFloat("mu1_SPhiPhi");
+      mu1_SPhiDxy = TheDimuon_->userFloat("mu1_SPhiDxy");
+      mu1_SPhiDsz = TheDimuon_->userFloat("mu1_SPhiDsz");
+      mu1_SDxyDxy = TheDimuon_->userFloat("mu1_SDxyDxy");
+      mu1_SDxyDsz = TheDimuon_->userFloat("mu1_SDxyDsz");
+      mu1_SDszDsz = TheDimuon_->userFloat("mu1_SDszDsz");
+
+      mu2_SQopQop = TheDimuon_->userFloat("mu2_SQopQop");
+      mu2_SQopLam = TheDimuon_->userFloat("mu2_SQopLam");
+      mu2_SQopPhi = TheDimuon_->userFloat("mu2_SQopPhi");
+      mu2_SQopDxy = TheDimuon_->userFloat("mu2_SQopDxy");
+      mu2_SQopDsz = TheDimuon_->userFloat("mu2_SQopDsz");
+      mu2_SLamLam = TheDimuon_->userFloat("mu2_SLamLam");
+      mu2_SLamPhi = TheDimuon_->userFloat("mu2_SLamPhi");
+      mu2_SLamDxy = TheDimuon_->userFloat("mu2_SLamDxy");
+      mu2_SLamDsz = TheDimuon_->userFloat("mu2_SLamDsz");
+      mu2_SPhiPhi = TheDimuon_->userFloat("mu2_SPhiPhi");
+      mu2_SPhiDxy = TheDimuon_->userFloat("mu2_SPhiDxy");
+      mu2_SPhiDsz = TheDimuon_->userFloat("mu2_SPhiDsz");
+      mu2_SDxyDxy = TheDimuon_->userFloat("mu2_SDxyDxy");
+      mu2_SDxyDsz = TheDimuon_->userFloat("mu2_SDxyDsz");
+      mu2_SDszDsz = TheDimuon_->userFloat("mu2_SDszDsz");
+
+      mu1_eigenValues = TheDimuon_->userFloat("mu1_eigenValues");
+      mu2_eigenValues = TheDimuon_->userFloat("mu2_eigenValues");
 
       const reco::Candidate::LorentzVector vP = TheDimuon_->daughter("muon1")->p4();
       const reco::Candidate::LorentzVector vM = TheDimuon_->daughter("muon2")->p4();
@@ -658,6 +916,7 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
 
       ups_p4.SetPtEtaPhiM(TheUps_.pt(),TheUps_.eta(),TheUps_.phi(),TheUps_.mass());
 
+      ups_diMuIndx    = TheUps_.userInt("diMuIndex");
       ups_vertexWeight = TheUps_.userFloat("vertexWeight");
       ups_vProb        = TheUps_.userFloat("vProb");
       ups_vMass        = TheUps_.userFloat("vMass");
@@ -686,6 +945,8 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
          muonP_p4.SetPtEtaPhiM(muM.pt(), muM.eta(), muM.phi(), muM.mass());
       }
 
+      ups_validFit = TheUps_.userInt("validFit");
+
       //double testPt1 = 0.;
       if (TheUps_.userInt("mu1_charge") > 0) {
         //testPt1 = TheUps_.userFloat("mu1_pt");
@@ -712,6 +973,42 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
         mu2_nvsh    = TheUps_.userInt("mu2_nvsh");
         mu2_nvph    = TheUps_.userInt("mu2_nvph");
         mu2_charge  = TheUps_.userInt("mu2_charge");
+
+        ups_mu1_SQopQop = TheUps_.userFloat("mu1_SQopQop");
+        ups_mu1_SQopLam = TheUps_.userFloat("mu1_SQopLam");
+        ups_mu1_SQopPhi = TheUps_.userFloat("mu1_SQopPhi");
+        ups_mu1_SQopDxy = TheUps_.userFloat("mu1_SQopDxy");
+        ups_mu1_SQopDsz = TheUps_.userFloat("mu1_SQopDsz");
+        ups_mu1_SLamLam = TheUps_.userFloat("mu1_SLamLam");
+        ups_mu1_SLamPhi = TheUps_.userFloat("mu1_SLamPhi");
+        ups_mu1_SLamDxy = TheUps_.userFloat("mu1_SLamDxy");
+        ups_mu1_SLamDsz = TheUps_.userFloat("mu1_SLamDsz");
+        ups_mu1_SPhiPhi = TheUps_.userFloat("mu1_SPhiPhi");
+        ups_mu1_SPhiDxy = TheUps_.userFloat("mu1_SPhiDxy");
+        ups_mu1_SPhiDsz = TheUps_.userFloat("mu1_SPhiDsz");
+        ups_mu1_SDxyDxy = TheUps_.userFloat("mu1_SDxyDxy");
+        ups_mu1_SDxyDsz = TheUps_.userFloat("mu1_SDxyDsz");
+        ups_mu1_SDszDsz = TheUps_.userFloat("mu1_SDszDsz");
+
+        ups_mu2_SQopQop = TheUps_.userFloat("mu2_SQopQop");
+        ups_mu2_SQopLam = TheUps_.userFloat("mu2_SQopLam");
+        ups_mu2_SQopPhi = TheUps_.userFloat("mu2_SQopPhi");
+        ups_mu2_SQopDxy = TheUps_.userFloat("mu2_SQopDxy");
+        ups_mu2_SQopDsz = TheUps_.userFloat("mu2_SQopDsz");
+        ups_mu2_SLamLam = TheUps_.userFloat("mu2_SLamLam");
+        ups_mu2_SLamPhi = TheUps_.userFloat("mu2_SLamPhi");
+        ups_mu2_SLamDxy = TheUps_.userFloat("mu2_SLamDxy");
+        ups_mu2_SLamDsz = TheUps_.userFloat("mu2_SLamDsz");
+        ups_mu2_SPhiPhi = TheUps_.userFloat("mu2_SPhiPhi");
+        ups_mu2_SPhiDxy = TheUps_.userFloat("mu2_SPhiDxy");
+        ups_mu2_SPhiDsz = TheUps_.userFloat("mu2_SPhiDsz");
+        ups_mu2_SDxyDxy = TheUps_.userFloat("mu2_SDxyDxy");
+        ups_mu2_SDxyDsz = TheUps_.userFloat("mu2_SDxyDsz");
+        ups_mu2_SDszDsz = TheUps_.userFloat("mu2_SDszDsz");
+
+        ups_mu1_eigenValues = TheUps_.userFloat("mu1_eigenValues");
+        ups_mu2_eigenValues = TheUps_.userFloat("mu2_eigenValues");
+
       } else {
         //testPt1 = TheUps_.userFloat("mu2_pt");
         mu1_pt      = TheUps_.userFloat("mu2_pt");
@@ -737,6 +1034,42 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
         mu2_nvsh    = TheUps_.userInt("mu1_nvsh");
         mu2_nvph    = TheUps_.userInt("mu1_nvph");
         mu2_charge  = TheUps_.userInt("mu1_charge");
+
+        ups_mu1_SQopQop = TheUps_.userFloat("mu2_SQopQop");
+        ups_mu1_SQopLam = TheUps_.userFloat("mu2_SQopLam");
+        ups_mu1_SQopPhi = TheUps_.userFloat("mu2_SQopPhi");
+        ups_mu1_SQopDxy = TheUps_.userFloat("mu2_SQopDxy");
+        ups_mu1_SQopDsz = TheUps_.userFloat("mu2_SQopDsz");
+        ups_mu1_SLamLam = TheUps_.userFloat("mu2_SLamLam");
+        ups_mu1_SLamPhi = TheUps_.userFloat("mu2_SLamPhi");
+        ups_mu1_SLamDxy = TheUps_.userFloat("mu2_SLamDxy");
+        ups_mu1_SLamDsz = TheUps_.userFloat("mu2_SLamDsz");
+        ups_mu1_SPhiPhi = TheUps_.userFloat("mu2_SPhiPhi");
+        ups_mu1_SPhiDxy = TheUps_.userFloat("mu2_SPhiDxy");
+        ups_mu1_SPhiDsz = TheUps_.userFloat("mu2_SPhiDsz");
+        ups_mu1_SDxyDxy = TheUps_.userFloat("mu2_SDxyDxy");
+        ups_mu1_SDxyDsz = TheUps_.userFloat("mu2_SDxyDsz");
+        ups_mu1_SDszDsz = TheUps_.userFloat("mu2_SDszDsz");
+
+        ups_mu2_SQopQop = TheUps_.userFloat("mu1_SQopQop");
+        ups_mu2_SQopLam = TheUps_.userFloat("mu1_SQopLam");
+        ups_mu2_SQopPhi = TheUps_.userFloat("mu1_SQopPhi");
+        ups_mu2_SQopDxy = TheUps_.userFloat("mu1_SQopDxy");
+        ups_mu2_SQopDsz = TheUps_.userFloat("mu1_SQopDsz");
+        ups_mu2_SLamLam = TheUps_.userFloat("mu1_SLamLam");
+        ups_mu2_SLamPhi = TheUps_.userFloat("mu1_SLamPhi");
+        ups_mu2_SLamDxy = TheUps_.userFloat("mu1_SLamDxy");
+        ups_mu2_SLamDsz = TheUps_.userFloat("mu1_SLamDsz");
+        ups_mu2_SPhiPhi = TheUps_.userFloat("mu1_SPhiPhi");
+        ups_mu2_SPhiDxy = TheUps_.userFloat("mu1_SPhiDxy");
+        ups_mu2_SPhiDsz = TheUps_.userFloat("mu1_SPhiDsz");
+        ups_mu2_SDxyDxy = TheUps_.userFloat("mu1_SDxyDxy");
+        ups_mu2_SDxyDsz = TheUps_.userFloat("mu1_SDxyDsz");
+        ups_mu2_SDszDsz = TheUps_.userFloat("mu1_SDszDsz");
+
+        ups_mu1_eigenValues = TheUps_.userFloat("mu2_eigenValues");
+        ups_mu2_eigenValues = TheUps_.userFloat("mu1_eigenValues");
+
       }
 
       //std::cout<<" ===> pt = "<<muonP_p4.Pt()<<" single one = "<<testPt1<<std::endl;

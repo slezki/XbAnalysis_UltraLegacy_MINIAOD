@@ -67,6 +67,7 @@ class Onia2MuMuPAT : public edm::EDProducer {
   int nMuMu = 0;
   int nMuMuM = 0;
   int nEvents = 0;
+  //int validFit = 0;
 
 };
 

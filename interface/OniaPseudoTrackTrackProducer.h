@@ -60,6 +60,10 @@ class OniaPseudoTrackTrackProducer : public edm::EDProducer {
   //std::vector<reco::Track> pionp;
   //std::vector<reco::Track> pionm;
   //float dxy,dz;
+  std::vector<int> piIndex;
+  std::vector<reco::TrackBase::CovarianceMatrix> covMatrix;
+
+  std::vector<float> eigenValues;
 
   GreaterByPt<reco::Track> PtComparator;
 
