@@ -402,11 +402,11 @@ void OniaRecoTrackTrackRootupler::analyze(const edm::Event& iEvent, const edm::E
                    foundit++;
                    for (uint j = 0; j < d->numberOfDaughters(); ++j) {
                      const reco::Candidate* p = d->daughter(j);
-                     if ( p->pdgId() == 13 && p->status() == 1 ) {
+                     if ( p->pdgId() == -13 && p->status() == 1 ) {
                         gen_muonp_p4.SetPtEtaPhiM(p->pt(),p->eta(),p->phi(),p->mass());
                         foundit++;
                      }
-                     if ( p->pdgId() == -13 && p->status() == 1 ) {
+                     if ( p->pdgId() == 13 && p->status() == 1 ) {
                         gen_muonn_p4.SetPtEtaPhiM(p->pt(),p->eta(),p->phi(),p->mass());
                         foundit++;
                      }
